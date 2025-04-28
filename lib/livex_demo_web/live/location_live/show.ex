@@ -1,5 +1,5 @@
 defmodule LivexDemoWeb.LocationLive.Show do
-  use LivexDemoWeb, :live_view
+  use LivexDemoWeb, :livex_view
 
   alias LivexDemo.Demo
 
@@ -33,11 +33,15 @@ defmodule LivexDemoWeb.LocationLive.Show do
     """
   end
 
+  attributes do
+    attribute :id, :string
+  end
+
   @impl true
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(_, _session, socket) do
     {:ok,
      socket
      |> assign(:page_title, "Show Location")
-     |> assign(:location, Demo.get_location!(id))}
+     |> assign(:location, Demo.get_location!(socket.assigns.id))}
   end
 end
