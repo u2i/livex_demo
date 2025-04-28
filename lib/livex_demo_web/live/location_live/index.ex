@@ -1,7 +1,8 @@
 defmodule LivexDemoWeb.LocationLive.Index do
-  use LivexDemoWeb, :live_view
+  use LivexDemoWeb, :livex_view
 
   alias LivexDemo.Demo
+  alias LivexDemoWeb.LocationLive
 
   @impl true
   def render(assigns) do
@@ -10,7 +11,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
       <.header>
         Listing Locations
         <:actions>
-          <.button variant="primary" navigate={~p"/locations/new"}>
+          <.button variant="primary" phx-click="new_location">
             <.icon name="hero-plus" /> New Location
           </.button>
         </:actions>
@@ -32,7 +33,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
           <div class="sr-only">
             <.link navigate={~p"/locations/#{location}"}>Show</.link>
           </div>
-          <.link navigate={~p"/locations/#{location}/edit"}>Edit</.link>
+          <.link phx-click="edit_location" phx-value-location_id={location.id}>Edit</.link>
         </:action>
         <:action :let={{id, location}}>
           <.link
@@ -43,8 +44,19 @@ defmodule LivexDemoWeb.LocationLive.Index do
           </.link>
         </:action>
       </.table>
+      <.live_component
+        :if={@location_modal}
+        id={:location_modal}
+        path={[]}
+        module={LocationLive.Form}
+        {@location_modal}
+      />
     </Layouts.app>
     """
+  end
+
+  components do
+    has_one :location_modal, LocationLive.Form
   end
 
   @impl true
@@ -61,5 +73,24 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:ok, _} = Demo.delete_location(location)
 
     {:noreply, stream_delete(socket, :locations, location)}
+  end
+
+  def handle_event("edit_location", params, socket) do
+    {:noreply,
+     socket
+     |> assign(:location_modal, %{action: :edit, location_id: params["location_id"]})}
+  end
+
+  def handle_event("new_location", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:location_modal, %{action: :new})}
+  end
+
+  def handle_info({:update_component, _path, assigns}, socket) do
+    {:noreply,
+     socket
+     |> assign(:location_modal, assigns && Map.merge(socket.assigns.modal, assigns))
+     |> stream(:locations, Demo.list_locations())}
   end
 end

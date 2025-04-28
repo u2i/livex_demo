@@ -1,63 +1,80 @@
 defmodule LivexDemoWeb.LocationLive.Form do
-  use LivexDemoWeb, :live_view
+  use LivexDemoWeb, :livex_component
 
   alias LivexDemo.Demo
   alias LivexDemo.Demo.Location
+  alias Phoenix.LiveView.JS
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
-      <.header>
-        {@page_title}
+    <div id={@id} phx-remove={modal_hide()}>
+      <.modal id={Atom.to_string(@id) <> "-modal"} on_close={JS.push("close", target: @myself)}>
+        <:title>{@page_title}</:title>
         <:subtitle>Use this form to manage location records in your database.</:subtitle>
-      </.header>
-
-      <.form for={@form} id="location-form" phx-change="validate" phx-submit="save">
-        <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:street]} type="text" label="Street" />
-        <.input field={@form[:city]} type="text" label="City" />
-        <.input field={@form[:state]} type="text" label="State" />
-        <.input field={@form[:zip]} type="text" label="Zip" />
-        <.input field={@form[:country]} type="text" label="Country" />
-        <.input field={@form[:description]} type="textarea" label="Description" />
-        <footer>
+        <.form
+          for={@form}
+          id={Atom.to_string(@id) <> "-form"}
+          phx-target={@myself}
+          phx-change="validate"
+          phx-submit="save"
+        >
+          <.input field={@form[:name]} type="text" label="Name" />
+          <.input field={@form[:street]} type="text" label="Street" />
+          <.input field={@form[:city]} type="text" label="City" />
+          <.input field={@form[:state]} type="text" label="State" />
+          <.input field={@form[:zip]} type="text" label="Zip" />
+          <.input field={@form[:country]} type="text" label="Country" />
+          <.input field={@form[:description]} type="textarea" label="Description" />
           <.button phx-disable-with="Saving..." variant="primary">Save Location</.button>
-          <.button navigate={return_path(@return_to, @location)}>Cancel</.button>
-        </footer>
-      </.form>
-    </Layouts.app>
+          <.button type="button" phx-target={@myself} phx-click="close">Cancel</.button>
+        </.form>
+      </.modal>
+    </div>
     """
   end
 
+  attributes do
+    attribute :location_id, :string
+    attribute :action, :atom
+  end
+
+  # def mount(socket) do
+  #   socket
+  #   |> initialize_private()
+  #   |> then(&{:ok, &1})
+  # end
+
   @impl true
-  def mount(params, _session, socket) do
+  def update(%{location_id: location_id, action: :edit} = assigns, socket) do
+    location = Demo.get_location!(location_id)
+    changeset = Demo.change_location(location)
+
     {:ok,
      socket
-     |> assign(:return_to, return_to(params["return_to"]))
-     |> apply_action(socket.assigns.live_action, params)}
+     # you must have this
+     |> assign(assigns)
+     # below is ephemeral
+     |> assign(:form, to_form(changeset))
+     |> assign(:location, location)
+     |> assign(:page_title, page_title(:edit))}
   end
 
-  defp return_to("show"), do: "show"
-  defp return_to(_), do: "index"
-
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    location = Demo.get_location!(id)
-
-    socket
-    |> assign(:page_title, "Edit Location")
-    |> assign(:location, location)
-    |> assign(:form, to_form(Demo.change_location(location)))
-  end
-
-  defp apply_action(socket, :new, _params) do
+  def update(%{action: :new} = assigns, socket) do
     location = %Location{}
 
-    socket
-    |> assign(:page_title, "New Location")
-    |> assign(:location, location)
-    |> assign(:form, to_form(Demo.change_location(location)))
+    {:ok,
+     socket
+     # you must have this
+     |> assign(assigns)
+     # below is ephemeral
+     |> assign(:page_title, "New Location")
+     |> assign(:location, location)
+     |> assign(:form, to_form(Demo.change_location(location)))}
   end
+
+  defp page_title(:new), do: "New Location"
+  defp page_title(:edit), do: "Edit Location"
 
   @impl true
   def handle_event("validate", %{"location" => location_params}, socket) do
@@ -66,16 +83,22 @@ defmodule LivexDemoWeb.LocationLive.Form do
   end
 
   def handle_event("save", %{"location" => location_params}, socket) do
-    save_location(socket, socket.assigns.live_action, location_params)
+    save_location(socket, socket.assigns.action, location_params)
+  end
+
+  def handle_event("close", _, socket) do
+    {:noreply,
+     socket
+     |> push_delete()}
   end
 
   defp save_location(socket, :edit, location_params) do
     case Demo.update_location(socket.assigns.location, location_params) do
-      {:ok, location} ->
+      {:ok, _location} ->
         {:noreply,
          socket
          |> put_flash(:info, "Location updated successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, location))}
+         |> push_delete()}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -83,18 +106,15 @@ defmodule LivexDemoWeb.LocationLive.Form do
   end
 
   defp save_location(socket, :new, location_params) do
-    case Demo.create_location(location_params) do
-      {:ok, location} ->
+    case Demo.create_location(location_params) |> IO.inspect() do
+      {:ok, _location} ->
         {:noreply,
          socket
          |> put_flash(:info, "Location created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, location))}
+         |> push_delete()}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
-
-  defp return_path("index", _location), do: ~p"/locations"
-  defp return_path("show", location), do: ~p"/locations/#{location}"
 end

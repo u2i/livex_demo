@@ -416,12 +416,117 @@ defmodule LivexDemoWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Renders a modal window with optional title and subtitle slots, plus a semi-transparent backdrop that fades in/out gracefully.
+
+  ## Assigns
+    * `:id` - unique id for the modal container (required)
+    * `:on_close` - JS command to run when clicking outside or on the close button (optional)
+
+  ## Slots
+    * `:title` - slot for modal title (optional)
+    * `:subtitle` - slot for modal subtitle (optional)
+    * `:inner_block` - slot for modal content (required)
+  """
+  attr :id, :string, required: true, doc: "Unique ID for the modal container"
+  attr :on_close, :any, default: nil, doc: "JS command to run when closing the modal"
+
+  slot :title, doc: "Optional modal title"
+  slot :subtitle, doc: "Optional modal subtitle"
+  slot :inner_block, required: true, doc: "Content rendered inside the modal"
+
+  def modal(assigns) do
+    assigns =
+      assign_new(assigns, :on_close, fn ->
+        # Default close: dispatch a click event on the backdrop
+        JS.dispatch("click", to: "##{assigns.id}")
+      end)
+
+    ~H"""
+    <div
+      id={@id}
+      class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
+      phx-click={@on_close}
+      phx-mounted={modal_show()}
+      phx-remove={modal_hide()}
+    >
+      
+    <!-- Backdrop overlay -->
+      <div class="absolute inset-0 bg-black opacity-0 transition-all ease-out duration-300 modal-backdrop" />
+      
+    <!-- Modal content -->
+      <div
+        class="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6 opacity-0 scale-95 translate-y-4 transition-all duration-300 modal-content"
+        phx-click=""
+      >
+        <button
+          type="button"
+          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          phx-click={@on_close}
+        >
+          &times;
+        </button>
+
+        <%= if @title != [] do %>
+          <h2 class="text-xl font-semibold mb-2">{render_slot(@title)}</h2>
+        <% end %>
+
+        <%= if @subtitle != [] do %>
+          <p class="text-sm text-gray-600 mb-4">{render_slot(@subtitle)}</p>
+        <% end %>
+
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Defines transition effects for modal entrance animation.
+  """
+  def modal_show(js \\ %JS{}) do
+    JS.transition(
+      js,
+      {"transition-all ease-out duration-300", "opacity-0", "opacity-100"},
+      to: ".modal-container"
+    )
+    |> JS.transition(
+      {"transition-all ease-out duration-300", "opacity-0", "opacity-20"},
+      to: ".modal-backdrop"
+    )
+    |> JS.transition(
+      {"transition-all ease-out duration-300", "opacity-0 scale-95 translate-y-4",
+       "opacity-100 scale-100 translate-y-0"},
+      to: ".modal-content"
+    )
+  end
+
+  @doc """
+  Defines transition effects for modal exit animation.
+  """
+  def modal_hide(js \\ %JS{}) do
+    JS.transition(
+      js,
+      {"transition-all ease-in duration-200", "opacity-100", "opacity-0"},
+      to: ".modal-container"
+    )
+    |> JS.transition(
+      {"transition-all ease-in duration-300", "opacity-20", "opacity-0"},
+      to: ".modal-backdrop"
+    )
+    |> JS.transition(
+      {"transition-all ease-in duration-200", "opacity-100 scale-100 translate-y-0",
+       "opacity-0 scale-95 translate-y-4"},
+      to: ".modal-content"
+    )
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
-      time: 300,
+      time: 3000,
       transition:
         {"transition-all ease-out duration-300",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
