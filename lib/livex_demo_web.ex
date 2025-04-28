@@ -56,9 +56,25 @@ defmodule LivexDemoWeb do
     end
   end
 
+  def livex_view do
+    quote do
+      use Livex.LivexView
+
+      unquote(html_helpers())
+    end
+  end
+
   def live_component do
     quote do
       use Phoenix.LiveComponent
+
+      unquote(html_helpers())
+    end
+  end
+
+  def livex_component do
+    quote do
+      use Livex.LivexComponent
 
       unquote(html_helpers())
     end
