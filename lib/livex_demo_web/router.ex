@@ -17,12 +17,11 @@ defmodule LivexDemoWeb.Router do
   scope "/", LivexDemoWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # Redirect root path to locations
+    get "/", RedirectController, :redirect_to_locations
 
     live "/locations", LocationLive.Index, :index
-    live "/locations/new", LocationLive.Form, :new
     live "/locations/:id", LocationLive.Show, :show
-    live "/locations/:id/edit", LocationLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.

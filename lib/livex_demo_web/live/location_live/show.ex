@@ -58,12 +58,14 @@ defmodule LivexDemoWeb.LocationLive.Show do
      |> assign(:location, Demo.get_location!(socket.assigns.id))}
   end
 
-  def handle_event("edit_location", params, socket) do
+  @impl true
+  def handle_event("edit_location", _params, socket) do
     {:noreply,
      socket
      |> assign(:location_modal, %{action: :edit})}
   end
 
+  @impl true
   def handle_info({:update_component, _path, assigns}, socket) do
     {:noreply,
      socket

@@ -87,6 +87,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
      |> assign(:location_modal, %{action: :new})}
   end
 
+  @impl true
   def handle_info({:update_component, _path, assigns}, socket) do
     {:noreply,
      socket

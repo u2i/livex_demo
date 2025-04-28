@@ -39,12 +39,6 @@ defmodule LivexDemoWeb.LocationLive.Form do
     attribute :action, :atom
   end
 
-  # def mount(socket) do
-  #   socket
-  #   |> initialize_private()
-  #   |> then(&{:ok, &1})
-  # end
-
   @impl true
   def update(%{location_id: location_id, action: :edit} = assigns, socket) do
     location = Demo.get_location!(location_id)
@@ -68,9 +62,9 @@ defmodule LivexDemoWeb.LocationLive.Form do
      # you must have this
      |> assign(assigns)
      # below is ephemeral
-     |> assign(:page_title, "New Location")
-     |> assign(:location, location)
-     |> assign(:form, to_form(Demo.change_location(location)))}
+     |> assign(:form, to_form(Demo.change_location(location)))
+     |> assign(:page_title, page_title(:new))
+     |> assign(:location, location)}
   end
 
   defp page_title(:new), do: "New Location"
