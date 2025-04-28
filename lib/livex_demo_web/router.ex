@@ -18,6 +18,11 @@ defmodule LivexDemoWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/locations", LocationLive.Index, :index
+    live "/locations/new", LocationLive.Form, :new
+    live "/locations/:id", LocationLive.Show, :show
+    live "/locations/:id/edit", LocationLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.
