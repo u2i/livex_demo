@@ -4,6 +4,7 @@ defmodule LivexDemoWeb.LocationLive.Form do
   alias LivexDemo.Demo
   alias LivexDemo.Demo.Location
   alias Phoenix.LiveView.JS
+  alias LivexDemoWeb.LocationComponents.StateProvinceSelector
 
   @impl true
   def render(assigns) do
@@ -21,10 +22,17 @@ defmodule LivexDemoWeb.LocationLive.Form do
         >
           <.input field={@form[:name]} type="text" label="Name" />
           <.input field={@form[:street]} type="text" label="Street" />
+
           <.input field={@form[:city]} type="text" label="City" />
-          <.input field={@form[:state]} type="text" label="State" />
           <.input field={@form[:zip]} type="text" label="Zip" />
-          <.input field={@form[:country]} type="text" label="Country" />
+          <.live_component
+            module={LivexDemoWeb.LocationComponents.StateProvinceSelector}
+            id="state_province_selector"
+            path={[:location_modal, :state_province_selector]}
+            {@state_province_selector}
+            field={@form[:state]}
+            country_field={@form[:country]}
+          />
           <.input field={@form[:description]} type="textarea" label="Description" />
           <.button phx-disable-with="Saving..." variant="primary">Save Location</.button>
           <.button type="button" phx-target={@myself} phx-click="close">Cancel</.button>
@@ -39,6 +47,10 @@ defmodule LivexDemoWeb.LocationLive.Form do
     attribute :action, :atom
   end
 
+  components do
+    has_one :state_province_selector, LivexDemoWeb.LocationComponents.StateProvinceSelector
+  end
+
   @impl true
   def update(%{location_id: location_id, action: :edit} = assigns, socket) do
     location = Demo.get_location!(location_id)
@@ -51,6 +63,10 @@ defmodule LivexDemoWeb.LocationLive.Form do
      # below is ephemeral
      |> assign(:form, to_form(changeset))
      |> assign(:location, location)
+     |> assign(:country, location.country || "US")
+     |> assign_new(:state_province_selector, fn ->
+       %{country: String.to_existing_atom(location.country)}
+     end)
      |> assign(:page_title, page_title(:edit))}
   end
 
@@ -64,6 +80,8 @@ defmodule LivexDemoWeb.LocationLive.Form do
      # below is ephemeral
      |> assign(:form, to_form(Demo.change_location(location)))
      |> assign(:page_title, page_title(:new))
+     |> assign(:country, "US")
+     |> assign_new(:state_province_selector, fn -> %{country: :us} end)
      |> assign(:location, location)}
   end
 
@@ -74,6 +92,10 @@ defmodule LivexDemoWeb.LocationLive.Form do
   def handle_event("validate", %{"location" => location_params}, socket) do
     changeset = Demo.change_location(socket.assigns.location, location_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+  end
+
+  def handle_event("country_changed", %{"location" => %{"country" => country}}, socket) do
+    {:noreply, assign(socket, :country, country)}
   end
 
   def handle_event("save", %{"location" => location_params}, socket) do
@@ -110,5 +132,15 @@ defmodule LivexDemoWeb.LocationLive.Form do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  @impl true
+  def handle_info({:update_component, _path, assigns}, socket) do
+    {:noreply,
+     socket
+     |> assign(
+       :state_province_selector,
+       assigns && Map.merge(socket.assigns.state_province_selector, assigns)
+     )}
   end
 end

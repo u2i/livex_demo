@@ -8,7 +8,15 @@ defmodule LivexDemo.DemoTest do
 
     import LivexDemo.DemoFixtures
 
-    @invalid_attrs %{name: nil, state: nil, zip: nil, description: nil, street: nil, city: nil, country: nil}
+    @invalid_attrs %{
+      name: nil,
+      state: nil,
+      zip: nil,
+      description: nil,
+      street: nil,
+      city: nil,
+      country: nil
+    }
 
     test "list_locations/0 returns all locations" do
       location = location_fixture()
@@ -21,7 +29,15 @@ defmodule LivexDemo.DemoTest do
     end
 
     test "create_location/1 with valid data creates a location" do
-      valid_attrs = %{name: "some name", state: "some state", zip: "some zip", description: "some description", street: "some street", city: "some city", country: "some country"}
+      valid_attrs = %{
+        name: "some name",
+        state: "some state",
+        zip: "some zip",
+        description: "some description",
+        street: "some street",
+        city: "some city",
+        country: "some country"
+      }
 
       assert {:ok, %Location{} = location} = Demo.create_location(valid_attrs)
       assert location.name == "some name"
@@ -39,7 +55,16 @@ defmodule LivexDemo.DemoTest do
 
     test "update_location/2 with valid data updates the location" do
       location = location_fixture()
-      update_attrs = %{name: "some updated name", state: "some updated state", zip: "some updated zip", description: "some updated description", street: "some updated street", city: "some updated city", country: "some updated country"}
+
+      update_attrs = %{
+        name: "some updated name",
+        state: "some updated state",
+        zip: "some updated zip",
+        description: "some updated description",
+        street: "some updated street",
+        city: "some updated city",
+        country: "some updated country"
+      }
 
       assert {:ok, %Location{} = location} = Demo.update_location(location, update_attrs)
       assert location.name == "some updated name"

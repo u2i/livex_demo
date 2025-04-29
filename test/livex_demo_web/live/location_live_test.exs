@@ -4,9 +4,33 @@ defmodule LivexDemoWeb.LocationLiveTest do
   import Phoenix.LiveViewTest
   import LivexDemo.DemoFixtures
 
-  @create_attrs %{name: "some name", state: "some state", zip: "some zip", description: "some description", street: "some street", city: "some city", country: "some country"}
-  @update_attrs %{name: "some updated name", state: "some updated state", zip: "some updated zip", description: "some updated description", street: "some updated street", city: "some updated city", country: "some updated country"}
-  @invalid_attrs %{name: nil, state: nil, zip: nil, description: nil, street: nil, city: nil, country: nil}
+  @create_attrs %{
+    name: "some name",
+    state: "some state",
+    zip: "some zip",
+    description: "some description",
+    street: "some street",
+    city: "some city",
+    country: "some country"
+  }
+  @update_attrs %{
+    name: "some updated name",
+    state: "some updated state",
+    zip: "some updated zip",
+    description: "some updated description",
+    street: "some updated street",
+    city: "some updated city",
+    country: "some updated country"
+  }
+  @invalid_attrs %{
+    name: nil,
+    state: nil,
+    zip: nil,
+    description: nil,
+    street: nil,
+    city: nil,
+    country: nil
+  }
   defp create_location(_) do
     location = location_fixture()
 
