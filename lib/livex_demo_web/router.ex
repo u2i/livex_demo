@@ -21,7 +21,7 @@ defmodule LivexDemoWeb.Router do
     get "/", RedirectController, :redirect_to_locations
 
     live "/locations", LocationLive.Index, :index
-    live "/locations/:id", LocationLive.Show, :show
+    live "/locations/:location_id", LocationLive.Show, :show
   end
 
   # Other scopes may use custom stacks.

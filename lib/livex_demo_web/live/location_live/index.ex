@@ -47,7 +47,6 @@ defmodule LivexDemoWeb.LocationLive.Index do
       <.live_component
         :if={@location_modal}
         id={:location_modal}
-        path={[:location_modal]}
         module={LocationLive.Form}
         {@location_modal}
       />
@@ -64,6 +63,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Locations")
+     |> assign_new(:location_modal, fn -> nil end)
      |> stream(:locations, Demo.list_locations())}
   end
 
@@ -78,36 +78,12 @@ defmodule LivexDemoWeb.LocationLive.Index do
   def handle_event("edit_location", params, socket) do
     {:noreply,
      socket
-     |> assign(:location_modal, %{action: :edit, location_id: params["location_id"]})}
+     |> create_component(:location_modal, %{action: :edit, location_id: params["location_id"]})}
   end
 
   def handle_event("new_location", _params, socket) do
     {:noreply,
      socket
-     |> assign(:location_modal, %{action: :new})}
-  end
-
-  @impl true
-  def handle_info({:update_component, [:location_modal], assigns}, socket) do
-    {:noreply,
-     socket
-     |> assign(:location_modal, assigns && Map.merge(socket.assigns.modal, assigns))
-     |> stream(:locations, Demo.list_locations())}
-  end
-
-  def handle_info(
-        {:update_component, [:location_modal, :state_province_selector], new_data},
-        socket
-      ) do
-    socket =
-      update(socket, :location_modal, fn modal ->
-        update_in(modal, [:state_province_selector], fn
-          # if it’s nil the first time around, just shove in the new_data
-          nil -> new_data
-          old -> Map.merge(old, new_data)
-        end)
-      end)
-
-    {:noreply, socket}
+     |> create_component(:location_modal, %{action: :new})}
   end
 end

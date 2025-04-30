@@ -33,17 +33,15 @@ defmodule LivexDemoWeb.LocationLive.Show do
       <.live_component
         :if={@location_modal}
         id={:location_modal}
-        path={[]}
         module={LocationLive.Form}
         {@location_modal}
-        location_id={@id}
       />
     </Layouts.app>
     """
   end
 
   attributes do
-    attribute :id, :string
+    attribute :location_id, :string
   end
 
   components do
@@ -51,25 +49,21 @@ defmodule LivexDemoWeb.LocationLive.Show do
   end
 
   @impl true
-  def mount(_, _session, socket) do
+  def mount(_assigns, _session, socket) do
     {:ok,
      socket
      |> assign(:page_title, "Show Location")
-     |> assign(:location, Demo.get_location!(socket.assigns.id))}
+     |> assign_new(:location_modal, fn -> nil end)
+     |> assign(:location, Demo.get_location!(socket.assigns.location_id))}
   end
 
   @impl true
   def handle_event("edit_location", _params, socket) do
     {:noreply,
      socket
-     |> assign(:location_modal, %{action: :edit})}
-  end
-
-  @impl true
-  def handle_info({:update_component, _path, assigns}, socket) do
-    {:noreply,
-     socket
-     |> assign(:location_modal, assigns && Map.merge(socket.assigns.modal, assigns))
-     |> assign(:location, Demo.get_location!(socket.assigns.id))}
+     |> create_component(:location_modal, %{
+       action: :edit,
+       location_id: socket.assigns.location_id
+     })}
   end
 end

@@ -30,16 +30,46 @@ const csrfToken = document
 const liveSocket = new LiveSocket("/live", Socket, {
 	longPollFallbackMs: 2500,
 	params: { _csrf_token: csrfToken },
+	logger: (kind, msg, data) => console.log(`[LiveSocket ${kind}] ${msg}`, data),
 });
+
+// --- expose a little helper so we don’t reach into private APIs everywhere
+liveSocket.pushPatchUrl = (href, linkState = {}) => {
+	// historyPatch will bump LiveSocket.currentHistoryPosition,
+	// call Browser.pushState, and fire phx:navigate
+	liveSocket.historyPatch(href, linkState);
+};
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
 window.addEventListener("phx:page-loading-start", (_info) => topbar.show(300));
 window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
 
+// // now listen for update_url and delegate to our helper
+// window.addEventListener("phx:update_url", ({ detail }) => {
+// 	if (detail && detail.uri) {
+// 		// you can pass detail.linkState if you emit it server-side
+// 		console.log(detail);
+// 		liveSocket.pushPatchUrl(detail.uri, detail.linkState || { a: "b" });
+// 	}
+// });
+
 window.addEventListener("phx:update_url", ({ detail }) => {
 	if (detail && detail.uri) {
-		history.pushState({}, "", detail.uri);
+		// 1) change the browser URL
+		const newUrl = detail.uri;
+		history.pushState({ patch: true }, "", newUrl);
+
+		// 2) teach LiveSocket about the new location
+		liveSocket.href = window.location.href;
+		liveSocket.currentLocation = {
+			pathname: window.location.pathname,
+			search: window.location.search,
+			hash: window.location.hash,
+		};
+
+		// 3) update the main View’s stored href
+		liveSocket.main.setHref(newUrl);
 	}
 });
 

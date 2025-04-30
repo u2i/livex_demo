@@ -77,14 +77,14 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} phx-target={@myself} class="space-y-4">
+    <div id={@id} phx-value-target_path="location_modal/state_province_selector" class="space-y-4">
       <div class="country-selector">
         <label class="block text-sm font-semibold leading-6 text-zinc-800">Country</label>
         <div class="flex space-x-2 mt-1">
           <button
             type="button"
             class={"px-3 py-2 text-sm font-medium rounded-md #{if @country == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-target={@myself}
+            phx-value-__target_path="location_modal/state_province_selector"
             phx-click="select_country"
             phx-value-country="us"
           >
@@ -93,7 +93,7 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
           <button
             type="button"
             class={"px-3 py-2 text-sm font-medium rounded-md #{if @country == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-target={@myself}
+            phx-value-__target_path="location_modal/state_province_selector"
             phx-click="select_country"
             phx-value-country="ca"
           >
@@ -119,7 +119,8 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
   end
 
   @impl true
-  def update(assigns, socket) do
+  def mount(assigns, socket) do
+    IO.puts(">>> MOUNTING #{[]}")
     IO.inspect(assigns, label: :assigns)
 
     country =
@@ -131,9 +132,9 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
 
     {:ok,
      socket
-     |> assign(assigns)
-     |> assign_new(:country, fn -> :us end)
-     |> assign(:state_options, get_options(country))}
+     |> assign_(assigns)
+     |> assign_new_(:country, fn -> :us end)
+     |> assign_(:state_options, get_options(country))}
   end
 
   @impl true
@@ -142,8 +143,8 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
 
     {:noreply,
      socket
-     |> assign(:country, country)
-     |> push_state()}
+     |> assign_(:country, country)
+     |> assign_(:state_options, get_options(country))}
   end
 
   defp get_options(:ca), do: @canadian_provinces
