@@ -30,7 +30,6 @@ defmodule LivexDemoWeb.CoreComponents do
   use Gettext, backend: LivexDemoWeb.Gettext
 
   alias Phoenix.LiveView.JS
-  use Livex.JSX
 
   @doc """
   Renders flash notices.
@@ -89,7 +88,7 @@ defmodule LivexDemoWeb.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method)
+  attr :rest, :global, include: ~w(href navigate patch method disabled)
   attr :variant, :string, values: ~w(primary)
   slot :inner_block, required: true
 
@@ -437,8 +436,6 @@ defmodule LivexDemoWeb.CoreComponents do
   slot :inner_block, required: true, doc: "Content rendered inside the modal"
 
   def modal(assigns) do
-    alias Livex.JSX
-
     ~H"""
     <div
       id={@id}

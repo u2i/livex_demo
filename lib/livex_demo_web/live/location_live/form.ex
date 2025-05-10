@@ -8,6 +8,18 @@ defmodule LivexDemoWeb.LocationLive.Form do
   def new, do: %{action: :new}
   def edit(id), do: %{action: :edit, location_id: id}
 
+  prop :location_id, :string
+  prop :action, :atom
+
+  def pre_render(socket) do
+    {:noreply,
+     socket
+     |> assign_new(:location, [:action, :location_id], &get_location(&1.action, &1))
+     |> assign_new(:form, [:location], &to_form(Demo.change_location(&1.location)))
+     |> assign_new(:is_button_disabled, fn -> false end)
+     |> assign_new(:page_title, [:action], &page_title(&1.action))}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -53,20 +65,8 @@ defmodule LivexDemoWeb.LocationLive.Form do
     """
   end
 
-  prop :location_id, :string
-  prop :action, :atom
-
-  def pre_render(%{assigns: %{action: action, location_id: location_id}} = socket) do
-    {:noreply,
-     socket
-     |> assign_new(:location, [:location_id], &get_location(action, &1))
-     |> assign_new(:form, [:location], &to_form(Demo.change_location(&1.location)))
-     |> assign_new(:is_button_disabled, fn -> false end)
-     |> assign(:page_title, page_title(action))}
-  end
-
   defp get_location(:edit, assigns), do: Demo.get_location!(assigns.location_id)
-  defp get_location(:new, assigns), do: %Location{}
+  defp get_location(:new, _assigns), do: %Location{}
 
   defp page_title(:new), do: "New Location"
   defp page_title(:edit), do: "Edit Location"
@@ -79,7 +79,7 @@ defmodule LivexDemoWeb.LocationLive.Form do
 
   def handle_event("save", %{"location" => location_params}, socket) do
     case write_location(socket, location_params) do
-      {:ok, location} ->
+      {:ok, _location} ->
         {:noreply, assign(socket, :is_button_disabled, true) |> push_emit(:close)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

@@ -63,7 +63,6 @@ defmodule LivexDemoWeb.LocationLive.Index do
 
   data :location_modal, LocationLive.Form, url?: false
 
-  @impl true
   def pre_render(socket) do
     {:noreply,
      socket
@@ -71,10 +70,6 @@ defmodule LivexDemoWeb.LocationLive.Index do
      |> assign_new(:page_title, fn -> "Listing Locations" end)
      |> assign_new(:location_modal, fn -> nil end)
      |> stream(:locations, Demo.list_locations())}
-  end
-
-  def handle_params(_, _, socket) do
-    {:noreply, socket}
   end
 
   @impl true
