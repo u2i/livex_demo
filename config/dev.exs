@@ -53,11 +53,16 @@ config :livex_demo, LivexDemoWeb.Endpoint,
 config :livex_demo, LivexDemoWeb.Endpoint,
   live_reload: [
     web_console_logger: true,
-    patterns: [
-      ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/livex_demo_web/(controllers|live|components)/.*(ex|heex)$"
-    ]
+    patterns:
+      unless System.get_env("LIVE_RELOAD") in ["0", "false"] do
+        [
+          ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
+          ~r"priv/gettext/.*(po)$",
+          ~r"lib/livex_demo_web/(controllers|live|components)/.*(ex|heex)$"
+        ]
+      else
+        []
+      end
   ]
 
 # Enable dev routes for dashboard and mailbox

@@ -3,17 +3,22 @@ defmodule LivexDemoWeb.LocationLive.Form do
 
   alias LivexDemo.Demo
   alias LivexDemo.Demo.Location
-  alias Phoenix.LiveView.JS
   alias LivexDemoWeb.LocationComponents.StateProvinceSelector
+
+  def new, do: %{action: :new}
+  def edit(id), do: %{action: :edit, location_id: id}
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} phx-remove={modal_hide()}>
-      <.modal
-        id={Atom.to_string(@id) <> "-modal"}
-        on_close={JS.push("close", value: %{__target_path: "location_modal"})}
-      >
+    <div
+      id={@id}
+      phx-remove={modal_hide()}
+      phx-mounted={modal_show()}
+      class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
+    >
+      <.modal id={Atom.to_string(@id) <> "-modal"} phx-close={JSX.emit(:close)}>
+        >
         <:title>{@page_title}</:title>
         <:subtitle>Use this form to manage location records in your database.</:subtitle>
         <.form
@@ -21,7 +26,7 @@ defmodule LivexDemoWeb.LocationLive.Form do
           id={Atom.to_string(@id) <> "-form"}
           phx-change="validate"
           phx-submit="save"
-          phx-value-__target_path="location_modal"
+          phx-target={@myself}
         >
           <.input field={@form[:name]} type="text" label="Name" />
           <.input field={@form[:street]} type="text" label="Street" />
@@ -31,13 +36,15 @@ defmodule LivexDemoWeb.LocationLive.Form do
           <.live_component
             id={:state_province_selector}
             module={StateProvinceSelector}
-            {@state_province_selector}
-            field={@form[:state]}
+            state_field={@form[:state]}
             country_field={@form[:country]}
+            phx-target={@myself}
           />
           <.input field={@form[:description]} type="textarea" label="Description" />
-          <.button phx-disable-with="Saving..." variant="primary">Save Location</.button>
-          <.button type="button" phx-click="close" phx-value-__target_path="location_modal">
+          <.button phx-disable-with="Saving..." disabled={@is_button_disabled} variant="primary">
+            Save Location
+          </.button>
+          <.button type="button" phx-click={JSX.emit(:close)}>
             Cancel
           </.button>
         </.form>
@@ -46,98 +53,43 @@ defmodule LivexDemoWeb.LocationLive.Form do
     """
   end
 
-  attributes do
-    attribute :location_id, :string
-    attribute :action, :atom
-  end
+  prop :location_id, :string
+  prop :action, :atom
 
-  components do
-    has_one :state_province_selector, LivexDemoWeb.LocationComponents.StateProvinceSelector
-  end
-
-  def mount(%{location_id: location_id, action: :edit} = assigns, socket) do
-    location = Demo.get_location!(location_id)
-    changeset = Demo.change_location(location)
-
-    socket =
-      socket
-      |> assign_(assigns)
-
-    {:ok,
-     unless Map.has_key?(assigns(socket), :state_province_selector) do
-       socket
-       |> create_component(:state_province_selector, %{
-         country: String.to_existing_atom(location.country)
-       })
-     else
-       socket
-     end
-     |> assign_(:form, to_form(changeset))
-     |> assign_(:location, location)
-     |> assign_(:page_title, page_title(:edit))}
-  end
-
-  def mount(%{action: :new} = assigns, socket) do
-    location = %Location{}
-
-    {:ok,
+  def pre_render(%{assigns: %{action: action, location_id: location_id}} = socket) do
+    {:noreply,
      socket
-     # you must have this
-     |> assign_(assigns)
-     # below is ephemeral
-     |> assign_(:form, to_form(Demo.change_location(location)))
-     |> assign_(:page_title, page_title(:new))
-     |> assign_(:country, "US")
-     # |> assign_new(:state_province_selector, fn -> %{country: :us} end)
-     |> assign_(:location, location)}
+     |> assign_new(:location, [:location_id], &get_location(action, &1))
+     |> assign_new(:form, [:location], &to_form(Demo.change_location(&1.location)))
+     |> assign_new(:is_button_disabled, fn -> false end)
+     |> assign(:page_title, page_title(action))}
   end
+
+  defp get_location(:edit, assigns), do: Demo.get_location!(assigns.location_id)
+  defp get_location(:new, assigns), do: %Location{}
 
   defp page_title(:new), do: "New Location"
   defp page_title(:edit), do: "Edit Location"
 
   @impl true
   def handle_event("validate", %{"location" => location_params}, socket) do
-    changeset = Demo.change_location(assigns(socket).location, location_params)
-    {:noreply, assign_(socket, :form, to_form(changeset, action: :validate))}
+    changeset = Demo.change_location(socket.assigns.location, location_params)
+    {:noreply, assign(socket, :form, to_form(changeset, action: :validate))}
   end
 
-  def handle_event("country_changed", %{"location" => %{"country" => country}}, socket) do
-    {:noreply, assign_(socket, :country, country)}
-  end
-
-  def handle_event("save", %{"location" => location_params}, {s, h} = socket) do
-    save_location(socket, assigns(socket).action, location_params)
-  end
-
-  def handle_event("close", _, socket) do
-    {:noreply,
-     socket
-     |> push_delete()}
-  end
-
-  defp save_location(socket, :edit, location_params) do
-    case Demo.update_location(assigns(socket).location, location_params) do
-      {:ok, _location} ->
-        {:noreply,
-         socket
-         #    |> put_flash(:info, "Location updated successfully")
-         |> push_delete()}
+  def handle_event("save", %{"location" => location_params}, socket) do
+    case write_location(socket, location_params) do
+      {:ok, location} ->
+        {:noreply, assign(socket, :is_button_disabled, true) |> push_emit(:close)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_(socket, form: to_form(changeset))}
+        {:noreply, assign(socket, :form, to_form(changeset))}
     end
   end
 
-  defp save_location(socket, :new, location_params) do
-    case Demo.create_location(location_params) |> IO.inspect() do
-      {:ok, _location} ->
-        {:noreply,
-         socket
-         #   |> put_flash(:info, "Location created successfully")
-         |> push_delete()}
+  defp write_location(%{assigns: %{action: :edit}} = socket, location_params),
+    do: Demo.update_location(socket.assigns.location, location_params)
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_(socket, form: to_form(changeset))}
-    end
-  end
+  defp write_location(%{assigns: %{action: :new}}, location_params),
+    do: Demo.create_location(location_params)
 end

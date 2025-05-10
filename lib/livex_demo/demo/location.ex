@@ -18,6 +18,6 @@ defmodule LivexDemo.Demo.Location do
   def changeset(location, attrs) do
     location
     |> cast(attrs, [:name, :street, :city, :state, :zip, :country, :description])
-    |> validate_required([:name, :street, :city, :state, :zip, :country, :description])
+    |> validate_required([:name, :street, :city, :zip, :description])
   end
 end

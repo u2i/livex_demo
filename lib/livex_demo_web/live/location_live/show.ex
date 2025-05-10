@@ -1,5 +1,5 @@
 defmodule LivexDemoWeb.LocationLive.Show do
-  use LivexDemoWeb, :livex_view
+  use LivexDemoWeb, :live_view
 
   alias LivexDemo.Demo
   alias LivexDemoWeb.LocationLive
@@ -40,13 +40,14 @@ defmodule LivexDemoWeb.LocationLive.Show do
     """
   end
 
-  attributes do
-    attribute :location_id, :string
-  end
-
-  components do
-    has_one :location_modal, LocationLive.Form
-  end
+  #
+  # attributes do
+  #   attribute :location_id, :string
+  # end
+  #
+  # components do
+  #   has_one :location_modal, LocationLive.Form
+  # end
 
   @impl true
   def mount(_assigns, _session, socket) do
@@ -61,7 +62,7 @@ defmodule LivexDemoWeb.LocationLive.Show do
   def handle_event("edit_location", _params, socket) do
     {:noreply,
      socket
-     |> create_component(:location_modal, %{
+     |> assign(:location_modal, %{
        action: :edit,
        location_id: socket.assigns.location_id
      })}

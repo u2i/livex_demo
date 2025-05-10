@@ -30,6 +30,7 @@ defmodule LivexDemoWeb.CoreComponents do
   use Gettext, backend: LivexDemoWeb.Gettext
 
   alias Phoenix.LiveView.JS
+  use Livex.JSX
 
   @doc """
   Renders flash notices.
@@ -429,40 +430,38 @@ defmodule LivexDemoWeb.CoreComponents do
     * `:inner_block` - slot for modal content (required)
   """
   attr :id, :string, required: true, doc: "Unique ID for the modal container"
-  attr :on_close, :any, default: nil, doc: "JS command to run when closing the modal"
+  attr :"phx-close", :any, default: nil, doc: "Close event"
 
   slot :title, doc: "Optional modal title"
   slot :subtitle, doc: "Optional modal subtitle"
   slot :inner_block, required: true, doc: "Content rendered inside the modal"
 
   def modal(assigns) do
-    assigns =
-      assign_new(assigns, :on_close, fn ->
-        # Default close: dispatch a click event on the backdrop
-        JS.dispatch("click", to: "##{assigns.id}")
-      end)
+    alias Livex.JSX
 
     ~H"""
     <div
       id={@id}
-      class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
-      phx-click={@on_close}
-      phx-mounted={modal_show()}
       phx-remove={modal_hide()}
+      phx-mounted={modal_show()}
+      class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
     >
       
     <!-- Backdrop overlay -->
-      <div class="absolute inset-0 bg-black opacity-0 transition-all ease-out duration-300 modal-backdrop" />
+      <div
+        class="absolute inset-0 bg-black opacity-0 transition-all ease-out duration-300 modal-backdrop"
+        phx-click={assigns[:"phx-close"]}
+      />
       
     <!-- Modal content -->
       <div
+        id="foobar"
         class="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6 opacity-0 scale-95 translate-y-4 transition-all duration-300 modal-content"
-        phx-click=""
       >
         <button
           type="button"
           class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-          phx-click={@on_close}
+          phx-click={assigns[:"phx-close"]}
         >
           &times;
         </button>

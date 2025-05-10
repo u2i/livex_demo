@@ -80,33 +80,29 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
     <div id={@id} phx-value-target_path="location_modal/state_province_selector" class="space-y-4">
       <div class="country-selector">
         <label class="block text-sm font-semibold leading-6 text-zinc-800">Country</label>
-        <div class="flex space-x-2 mt-1">
+        <div id={@country_field.name} class="flex space-x-2 mt-1">
           <button
             type="button"
-            class={"px-3 py-2 text-sm font-medium rounded-md #{if @country == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-value-__target_path="location_modal/state_province_selector"
-            phx-click="select_country"
-            phx-value-country="us"
+            class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
+            phx-click={JSX.assign_data(:country_selected, :us)}
           >
             United States
           </button>
           <button
             type="button"
-            class={"px-3 py-2 text-sm font-medium rounded-md #{if @country == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-value-__target_path="location_modal/state_province_selector"
-            phx-click="select_country"
-            phx-value-country="ca"
+            class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
+            phx-click={JSX.assign_data(:country_selected, :ca)}
           >
             Canada
           </button>
         </div>
-        <.input type="text" field={@country_field} value={@country} />
+        <input type="hidden" name={@country_field.name} value={@country_selected} />
       </div>
       <div class="state-province-selector">
         <.input
-          field={@field}
+          field={@state_field}
           type="select"
-          label={if @country == :us, do: "State", else: "Province"}
+          label={if @country_selected == :us, do: "State", else: "Province"}
           options={@state_options}
         />
       </div>
@@ -114,37 +110,15 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
     """
   end
 
-  attributes do
-    attribute :country, :atom
-  end
+  prop :country_field, :any
+  prop :state_field, :any
+  data :country_selected, :atom
 
-  @impl true
-  def mount(assigns, socket) do
-    IO.puts(">>> MOUNTING #{[]}")
-    IO.inspect(assigns, label: :assigns)
-
-    country =
-      unless Map.has_key?(assigns, :country) do
-        :us
-      else
-        assigns.country
-      end
-
-    {:ok,
-     socket
-     |> assign_(assigns)
-     |> assign_new_(:country, fn -> :us end)
-     |> assign_(:state_options, get_options(country))}
-  end
-
-  @impl true
-  def handle_event("select_country", %{"country" => country_str}, socket) do
-    country = String.to_existing_atom(country_str)
-
+  def pre_render(socket) do
     {:noreply,
      socket
-     |> assign_(:country, country)
-     |> assign_(:state_options, get_options(country))}
+     |> assign_new(:country_selected, &(&1.country_field.value |> String.to_existing_atom()))
+     |> assign_new(:state_options, [:country_selected], &get_options(&1.country_selected))}
   end
 
   defp get_options(:ca), do: @canadian_provinces

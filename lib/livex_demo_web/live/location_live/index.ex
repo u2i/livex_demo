@@ -8,10 +8,21 @@ defmodule LivexDemoWeb.LocationLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
+      <.live_component
+        :if={@location_modal}
+        id={:location_modal}
+        module={LocationLive.Form}
+        parent={nil}
+        {@location_modal}
+        phx-close="close_modal"
+      />
       <.header>
         Listing Locations
         <:actions>
-          <.button variant="primary" phx-click="new_location">
+          <.button
+            variant="primary"
+            phx-click={JSX.assign_data(:location_modal, LocationLive.Form.new())}
+          >
             <.icon name="hero-plus" /> New Location
           </.button>
         </:actions>
@@ -33,7 +44,9 @@ defmodule LivexDemoWeb.LocationLive.Index do
           <div class="sr-only">
             <.link navigate={~p"/locations/#{location}"}>Show</.link>
           </div>
-          <.link phx-click="edit_location" phx-value-location_id={location.id}>Edit</.link>
+          <.link phx-click={JSX.assign_data(:location_modal, LocationLive.Form.edit(location.id))}>
+            Edit
+          </.link>
         </:action>
         <:action :let={{id, location}}>
           <.link
@@ -44,27 +57,24 @@ defmodule LivexDemoWeb.LocationLive.Index do
           </.link>
         </:action>
       </.table>
-      <.live_component
-        :if={@location_modal}
-        id={:location_modal}
-        module={LocationLive.Form}
-        {@location_modal}
-      />
     </Layouts.app>
     """
   end
 
-  components do
-    has_one :location_modal, LocationLive.Form
-  end
+  data :location_modal, LocationLive.Form, url?: false
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok,
+  def pre_render(socket) do
+    {:noreply,
      socket
-     |> assign(:page_title, "Listing Locations")
+     |> assign_new(:location_modal, fn -> nil end)
+     |> assign_new(:page_title, fn -> "Listing Locations" end)
      |> assign_new(:location_modal, fn -> nil end)
      |> stream(:locations, Demo.list_locations())}
+  end
+
+  def handle_params(_, _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -75,15 +85,9 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:noreply, stream_delete(socket, :locations, location)}
   end
 
-  def handle_event("edit_location", params, socket) do
-    {:noreply,
-     socket
-     |> create_component(:location_modal, %{action: :edit, location_id: params["location_id"]})}
-  end
+  def handle_event("close_modal", %{}, socket) do
+    location = Demo.get_location!(socket.assigns.location_modal.location_id)
 
-  def handle_event("new_location", _params, socket) do
-    {:noreply,
-     socket
-     |> create_component(:location_modal, %{action: :new})}
+    {:noreply, assign(socket, :location_modal, nil) |> stream_insert(:locations, location)}
   end
 end

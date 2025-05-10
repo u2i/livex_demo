@@ -4,7 +4,8 @@
   plugins: [Phoenix.LiveView.HTMLFormatter],
   inputs: ["*.{heex,ex,exs}", "{config,lib,test}/**/*.{heex,ex,exs}", "priv/*/seeds.exs"],
   locals_without_parens: [
-    attribute: 2,
-    component: 2
+    prop: 2,
+    data: 2,
+    data: 3
   ]
 ]
