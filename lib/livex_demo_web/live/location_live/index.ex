@@ -4,6 +4,17 @@ defmodule LivexDemoWeb.LocationLive.Index do
   alias LivexDemo.Demo
   alias LivexDemoWeb.LocationLive
 
+  data :location_modal, LocationLive.Form, url?: false
+
+  def pre_render(socket) do
+    {:noreply,
+     socket
+     |> assign_new(:location_modal, fn -> nil end)
+     |> assign_new(:page_title, fn -> "Listing Locations" end)
+     |> assign_new(:location_modal, fn -> nil end)
+     |> stream(:locations, Demo.list_locations())}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -61,17 +72,6 @@ defmodule LivexDemoWeb.LocationLive.Index do
     """
   end
 
-  data :location_modal, LocationLive.Form, url?: false
-
-  def pre_render(socket) do
-    {:noreply,
-     socket
-     |> assign_new(:location_modal, fn -> nil end)
-     |> assign_new(:page_title, fn -> "Listing Locations" end)
-     |> assign_new(:location_modal, fn -> nil end)
-     |> stream(:locations, Demo.list_locations())}
-  end
-
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     location = Demo.get_location!(id)
@@ -80,9 +80,13 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:noreply, stream_delete(socket, :locations, location)}
   end
 
-  def handle_event("close_modal", %{}, socket) do
-    location = Demo.get_location!(socket.assigns.location_modal.location_id)
+  def handle_event("close_modal", %{"location_id" => location_id}, socket) do
+    location = Demo.get_location!(location_id)
 
     {:noreply, assign(socket, :location_modal, nil) |> stream_insert(:locations, location)}
+  end
+
+  def handle_event("close_modal", _, socket) do
+    {:noreply, assign(socket, :location_modal, nil)}
   end
 end

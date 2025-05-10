@@ -74,6 +74,25 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
     {"Yukon", "YT"}
   ]
 
+  prop :country_field, :any
+  prop :state_field, :any
+  data :country_selected, :atom
+
+  def pre_render(socket) do
+    {:noreply,
+     socket
+     |> assign_new(:country_selected, &country_selected(&1))
+     |> assign_new(:state_options, [:country_selected], &get_options(&1.country_selected))}
+  end
+
+  defp country_selected(%{country_field: %{value: country}}) when not is_nil(country),
+    do: country |> String.to_existing_atom()
+
+  defp country_selected(_), do: :us
+
+  defp get_options(:ca), do: @canadian_provinces
+  defp get_options(_), do: @us_states
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -109,18 +128,4 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
     </div>
     """
   end
-
-  prop :country_field, :any
-  prop :state_field, :any
-  data :country_selected, :atom
-
-  def pre_render(socket) do
-    {:noreply,
-     socket
-     |> assign_new(:country_selected, &(&1.country_field.value |> String.to_existing_atom()))
-     |> assign_new(:state_options, [:country_selected], &get_options(&1.country_selected))}
-  end
-
-  defp get_options(:ca), do: @canadian_provinces
-  defp get_options(_), do: @us_states
 end

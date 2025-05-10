@@ -1,8 +1,19 @@
 defmodule LivexDemoWeb.LocationLive.Show do
-  use LivexDemoWeb, :live_view
+  use LivexDemoWeb, :livex_view
 
   alias LivexDemo.Demo
   alias LivexDemoWeb.LocationLive
+
+  data :location_id, :string, url?: true
+  data :location_modal, LocationLive.Form
+
+  def pre_render(socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, "Show Location")
+     |> assign_new(:location_modal, fn -> nil end)
+     |> assign_new(:location, [:location_id], &Demo.get_location!(&1.location_id))}
+  end
 
   @impl true
   def render(assigns) do
@@ -15,7 +26,10 @@ defmodule LivexDemoWeb.LocationLive.Show do
           <.button navigate={~p"/locations"}>
             <.icon name="hero-arrow-left" />
           </.button>
-          <.button variant="primary" phx-click="edit_location">
+          <.button
+            variant="primary"
+            phx-click={JSX.assign_data(:location_modal, LocationLive.Form.edit(@location.id))}
+          >
             <.icon name="hero-pencil-square" /> Edit location
           </.button>
         </:actions>
@@ -35,36 +49,15 @@ defmodule LivexDemoWeb.LocationLive.Show do
         id={:location_modal}
         module={LocationLive.Form}
         {@location_modal}
+        phx-close="close_modal"
       />
     </Layouts.app>
     """
   end
 
-  #
-  # attributes do
-  #   attribute :location_id, :string
-  # end
-  #
-  # components do
-  #   has_one :location_modal, LocationLive.Form
-  # end
-
-  @impl true
-  def mount(_assigns, _session, socket) do
-    {:ok,
-     socket
-     |> assign(:page_title, "Show Location")
-     |> assign_new(:location_modal, fn -> nil end)
-     |> assign(:location, Demo.get_location!(socket.assigns.location_id))}
-  end
-
-  @impl true
-  def handle_event("edit_location", _params, socket) do
+  def handle_event("close_modal", _, socket) do
     {:noreply,
-     socket
-     |> assign(:location_modal, %{
-       action: :edit,
-       location_id: socket.assigns.location_id
-     })}
+     Map.put(socket, :assigns, Map.drop(socket.assigns, [:location]))
+     |> assign(:location_modal, nil)}
   end
 end

@@ -30,7 +30,6 @@ defmodule LivexDemoWeb.LocationLive.Form do
       class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
     >
       <.modal id={Atom.to_string(@id) <> "-modal"} phx-close={JSX.emit(:close)}>
-        >
         <:title>{@page_title}</:title>
         <:subtitle>Use this form to manage location records in your database.</:subtitle>
         <.form
@@ -79,8 +78,10 @@ defmodule LivexDemoWeb.LocationLive.Form do
 
   def handle_event("save", %{"location" => location_params}, socket) do
     case write_location(socket, location_params) do
-      {:ok, _location} ->
-        {:noreply, assign(socket, :is_button_disabled, true) |> push_emit(:close)}
+      {:ok, location} ->
+        {:noreply,
+         assign(socket, :is_button_disabled, true)
+         |> push_emit(:close, value: %{location_id: location.id})}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
