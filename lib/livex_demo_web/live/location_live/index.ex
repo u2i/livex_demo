@@ -5,9 +5,9 @@ defmodule LivexDemoWeb.LocationLive.Index do
   alias LivexDemoWeb.LocationLive
   alias LivexDemoWeb.LocationComponents.LocationFilterSection
 
-  data :location_modal, LocationLive.Form, url?: false
-  data :filter_country, :atom, url?: true, one_of: [:ca, :us]
-  data :filter_state, :string, url?: true
+  state :location_modal, LocationLive.Form, url?: false
+  state :filter_country, :atom, url?: true, one_of: [:ca, :us]
+  state :filter_state, :string, url?: true
 
   def pre_render(socket) do
     {:noreply,

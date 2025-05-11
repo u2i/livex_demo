@@ -7,7 +7,7 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
 
   prop :country_field, :any
   prop :state_field, :any
-  data :country_selected, :atom
+  state :country_selected, :atom
 
   def pre_render(socket) do
     {:noreply,

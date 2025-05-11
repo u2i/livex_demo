@@ -4,8 +4,8 @@ defmodule LivexDemoWeb.LocationLive.Show do
   alias LivexDemo.Demo
   alias LivexDemoWeb.LocationLive
 
-  data :location_id, :string, url?: true
-  data :location_modal, LocationLive.Form
+  state :location_id, :string, url?: true
+  state :location_modal, LocationLive.Form
 
   def pre_render(socket) do
     {:noreply,

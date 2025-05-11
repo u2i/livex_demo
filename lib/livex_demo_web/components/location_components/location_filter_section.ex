@@ -11,10 +11,10 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
   prop :state, :string
   prop :title, :string
 
-  data :pending_country, :atom
-  data :pending_state, :string
-  data :has_changes, :boolean
-  data :expanded, :boolean
+  state :pending_country, :atom
+  state :pending_state, :string
+  state :has_changes, :boolean
+  state :expanded, :boolean
 
   def pre_render(socket) do
     {:noreply,

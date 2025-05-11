@@ -6,7 +6,7 @@
   locals_without_parens: [
     prop: 2,
     prop: 3,
-    data: 2,
-    data: 3
+    state: 2,
+    state: 3
   ]
 ]
