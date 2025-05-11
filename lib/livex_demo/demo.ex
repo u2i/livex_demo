@@ -8,6 +8,79 @@ defmodule LivexDemo.Demo do
 
   alias LivexDemo.Demo.Location
 
+  @us_states_with_names [
+    {"Alabama", "AL"},
+    {"Alaska", "AK"},
+    {"Arizona", "AZ"},
+    {"Arkansas", "AR"},
+    {"California", "CA"},
+    {"Colorado", "CO"},
+    {"Connecticut", "CT"},
+    {"Delaware", "DE"},
+    {"Florida", "FL"},
+    {"Georgia", "GA"},
+    {"Hawaii", "HI"},
+    {"Idaho", "ID"},
+    {"Illinois", "IL"},
+    {"Indiana", "IN"},
+    {"Iowa", "IA"},
+    {"Kansas", "KS"},
+    {"Kentucky", "KY"},
+    {"Louisiana", "LA"},
+    {"Maine", "ME"},
+    {"Maryland", "MD"},
+    {"Massachusetts", "MA"},
+    {"Michigan", "MI"},
+    {"Minnesota", "MN"},
+    {"Mississippi", "MS"},
+    {"Missouri", "MO"},
+    {"Montana", "MT"},
+    {"Nebraska", "NE"},
+    {"Nevada", "NV"},
+    {"New Hampshire", "NH"},
+    {"New Jersey", "NJ"},
+    {"New Mexico", "NM"},
+    {"New York", "NY"},
+    {"North Carolina", "NC"},
+    {"North Dakota", "ND"},
+    {"Ohio", "OH"},
+    {"Oklahoma", "OK"},
+    {"Oregon", "OR"},
+    {"Pennsylvania", "PA"},
+    {"Rhode Island", "RI"},
+    {"South Carolina", "SC"},
+    {"South Dakota", "SD"},
+    {"Tennessee", "TN"},
+    {"Texas", "TX"},
+    {"Utah", "UT"},
+    {"Vermont", "VT"},
+    {"Virginia", "VA"},
+    {"Washington", "WA"},
+    {"West Virginia", "WV"},
+    {"Wisconsin", "WI"},
+    {"Wyoming", "WY"},
+    {"District of Columbia", "DC"}
+  ]
+
+  @ca_provinces_with_names [
+    {"Alberta", "AB"},
+    {"British Columbia", "BC"},
+    {"Manitoba", "MB"},
+    {"New Brunswick", "NB"},
+    {"Newfoundland and Labrador", "NL"},
+    {"Northwest Territories", "NT"},
+    {"Nova Scotia", "NS"},
+    {"Nunavut", "NU"},
+    {"Ontario", "ON"},
+    {"Prince Edward Island", "PE"},
+    {"Quebec", "QC"},
+    {"Saskatchewan", "SK"},
+    {"Yukon", "YT"}
+  ]
+
+  @us_states Enum.map(@us_states_with_names, fn {_name, code} -> code end)
+  @ca_provinces Enum.map(@ca_provinces_with_names, fn {_name, code} -> code end)
+
   @doc """
   Returns the list of locations.
 
@@ -100,5 +173,137 @@ defmodule LivexDemo.Demo do
   """
   def change_location(%Location{} = location, attrs \\ %{}) do
     Location.changeset(location, attrs)
+  end
+
+  @doc """
+  Returns a list of US state codes (two-letter, capitalized).
+
+  ## Examples
+
+      iex> get_us_states()
+      ["AL", "AK", "AZ", ...]
+
+  """
+  def get_us_states do
+    @us_states
+  end
+
+  @doc """
+  Returns a list of Canadian province codes (two-letter, capitalized).
+
+  ## Examples
+
+      iex> get_ca_provinces()
+      ["AB", "BC", "MB", ...]
+
+  """
+  def get_ca_provinces do
+    @ca_provinces
+  end
+
+  @doc """
+  Returns a list of state/province codes for a specific country.
+
+  ## Examples
+
+      iex> get_states_for_country(:us)
+      ["AL", "AK", "AZ", ...]
+
+      iex> get_states_for_country(:ca)
+      ["AB", "BC", "MB", ...]
+
+      iex> get_states_for_country("us")
+      ["AL", "AK", "AZ", ...]
+
+  """
+  def get_states_for_country(:us), do: @us_states
+  def get_states_for_country(:ca), do: @ca_provinces
+  def get_states_for_country("us"), do: @us_states
+  def get_states_for_country("ca"), do: @ca_provinces
+  def get_states_for_country(_), do: []
+
+  @doc """
+  Returns a map of country codes to their respective state/province lists.
+
+  ## Examples
+
+      iex> get_countries_with_states()
+      %{
+        us: ["AL", "AK", "AZ", ...],
+        ca: ["AB", "BC", "MB", ...]
+      }
+
+  """
+  def get_countries_with_states do
+    %{
+      us: @us_states,
+      ca: @ca_provinces
+    }
+  end
+
+  @doc """
+  Returns a list of US states with their names and codes.
+
+  ## Examples
+
+      iex> get_us_states_with_names()
+      [{"Alabama", "AL"}, {"Alaska", "AK"}, ...]
+
+  """
+  def get_us_states_with_names do
+    @us_states_with_names
+  end
+
+  @doc """
+  Returns a list of Canadian provinces with their names and codes.
+
+  ## Examples
+
+      iex> get_ca_provinces_with_names()
+      [{"Alberta", "AB"}, {"British Columbia", "BC"}, ...]
+
+  """
+  def get_ca_provinces_with_names do
+    @ca_provinces_with_names
+  end
+
+  @doc """
+  Returns a list of state/province names and codes for a specific country.
+
+  ## Examples
+
+      iex> get_states_with_names_for_country(:us)
+      [{"Alabama", "AL"}, {"Alaska", "AK"}, ...]
+
+      iex> get_states_with_names_for_country(:ca)
+      [{"Alberta", "AB"}, {"British Columbia", "BC"}, ...]
+
+      iex> get_states_with_names_for_country("us")
+      [{"Alabama", "AL"}, {"Alaska", "AK"}, ...]
+
+  """
+  def get_states_with_names_for_country(:us), do: @us_states_with_names
+  def get_states_with_names_for_country(:ca), do: @ca_provinces_with_names
+  def get_states_with_names_for_country("us"), do: @us_states_with_names
+  def get_states_with_names_for_country("ca"), do: @ca_provinces_with_names
+  def get_states_with_names_for_country(_), do: []
+
+  @doc """
+  Returns a map of country codes to their respective state/province lists with names.
+
+  ## Examples
+
+      iex> get_countries_with_states_and_names()
+      %{
+        us: [{"Alabama", "AL"}, {"Alaska", "AK"}, ...],
+        ca: [{"Alberta", "AB"}, {"British Columbia", "BC"}, ...]
+      }
+
+  """
+  def get_countries_with_states_and_names do
+    %{
+      us: @us_states_with_names,
+      ca: @ca_provinces_with_names
+    }
   end
 end
