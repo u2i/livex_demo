@@ -75,8 +75,8 @@ defmodule LivexDemoWeb.LocationLive.Index do
       <.live_component
         id="location-filter"
         module={LocationFilterSection}
-        selected_country={@filter_country}
-        selected_state={@filter_state}
+        country={@filter_country}
+        state={@filter_state}
         title="Filter Locations"
         phx-change="change"
       />

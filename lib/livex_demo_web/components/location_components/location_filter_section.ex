@@ -7,12 +7,12 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
   alias LivexDemo.Demo
 
   prop :id, :string
-  prop :selected_country, :atom
-  prop :selected_state, :string
+  prop :country, :atom
+  prop :state, :string
   prop :title, :string
 
-  data :country_selected, :atom
-  data :state_selected, :string
+  data :pending_country, :atom
+  data :pending_state, :string
   data :has_changes, :boolean
   data :expanded, :boolean
 
@@ -21,15 +21,15 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
      socket
      |> assign_new(:has_changes, fn -> false end)
      |> assign_new(:expanded, fn -> false end)
-     |> assign_new(:country_selected, [:selected_country], &(&1.selected_country || :us))
-     |> assign_new(:state_selected, [:selected_state], & &1.selected_state)
-     |> assign_new(:state_options, [:country_selected], &get_options(&1.country_selected))
+     |> assign_new(:pending_country, [:country], &(&1.country || :us))
+     |> assign_new(:pending_state, [:state], & &1.state)
+     |> assign_new(:state_options, [:pending_country], &get_options(&1.pending_country))
      |> then(
        &assign(
          &1,
          :has_changes,
-         &1.assigns.country_selected != &1.assigns.selected_country ||
-           &1.assigns.state_selected != &1.assigns.selected_state
+         &1.assigns.pending_country != &1.assigns.country ||
+           &1.assigns.pending_state != &1.assigns.state
        )
      )}
   end
@@ -43,30 +43,30 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
       <div class="bg-white border border-gray-200 rounded-md shadow-sm p-3 flex items-center justify-between relative z-20">
         <div class="flex items-center space-x-2">
           <h3 class="text-lg font-medium text-gray-700">{@title}</h3>
-          <div :if={@selected_country || @selected_state} class="flex items-center ml-4">
+          <div :if={@country || @state} class="flex items-center ml-4">
             <span class="text-sm text-gray-500 mr-2">Filters:</span>
             <span
-              :if={@selected_country}
+              :if={@country}
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2"
             >
-              {if @selected_country == :us, do: "United States", else: "Canada"}
+              {if @country == :us, do: "United States", else: "Canada"}
             </span>
             <span
-              :if={@selected_state}
+              :if={@state}
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
             >
-              {@selected_state}
+              {@state}
             </span>
           </div>
 
-          <span :if={!@selected_country && !@selected_state} class="text-sm text-gray-500">
+          <span :if={!@country && !@state} class="text-sm text-gray-500">
             No filters applied
           </span>
         </div>
 
         <div class="flex items-center space-x-2">
           <button
-            :if={@selected_country || @selected_state}
+            :if={@country || @state}
             type="button"
             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
             phx-click={JSX.emit(:change, value: %{country: nil, state: nil})}
@@ -80,8 +80,8 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
               if @expanded do
                 JSX.assign_data(
                   expanded: false,
-                  country_selected: @selected_country,
-                  state_selected: @selected_state
+                  pending_country: @country,
+                  pending_state: @state
                 )
               else
                 JSX.assign_data(expanded: true)
@@ -105,8 +105,8 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
         phx-click={
           JSX.assign_data(
             expanded: false,
-            country_selected: @selected_country || :us,
-            state_selected: @selected_state
+            pending_country: @country || :us,
+            pending_state: @state
           )
         }
         phx-target={@myself}
@@ -122,16 +122,16 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             <div class="flex space-x-2 mt-1">
               <button
                 type="button"
-                class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-                phx-click={JSX.assign_data(country_selected: :us, state_selected: nil)}
+                class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
+                phx-click={JSX.assign_data(pending_country: :us, pending_state: nil)}
                 phx-target={@myself}
               >
                 United States
               </button>
               <button
                 type="button"
-                class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-                phx-click={JSX.assign_data(country_selected: :ca, state_selected: nil)}
+                class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
+                phx-click={JSX.assign_data(pending_country: :ca, pending_state: nil)}
                 phx-target={@myself}
               >
                 Canada
@@ -141,22 +141,22 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
 
           <div class="state-province-selector">
             <label class="block text-sm font-semibold leading-6 text-zinc-800">
-              {if @country_selected == :us, do: "State", else: "Province"}
+              {if @pending_country == :us, do: "State", else: "Province"}
             </label>
             <form>
               <select
                 class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-zinc-500 focus:ring-zinc-500 sm:text-sm"
-                name="state_selected"
+                name="pending_state"
                 phx-change={JSX.assign_data()}
                 phx-target={@myself}
               >
-                <option value="" disabled selected={is_nil(@state_selected)}>
-                  Select {if @country_selected == :us, do: "State", else: "Province"}
+                <option value="" disabled selected={is_nil(@pending_state)}>
+                  Select {if @pending_country == :us, do: "State", else: "Province"}
                 </option>
                 <option
                   :for={{name, code} <- @state_options}
                   value={code}
-                  selected={@state_selected == code}
+                  selected={@pending_state == code}
                 >
                   {name}
                 </option>
@@ -169,7 +169,7 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
               type="button"
               class={"px-3 py-2 text-sm font-medium rounded-md #{if @has_changes, do: "bg-blue-600 text-white hover:bg-blue-700", else: "bg-gray-200 text-gray-500 cursor-not-allowed"}"}
               phx-click={
-                JSX.emit(:change, value: %{country: @country_selected, state: @state_selected})
+                JSX.emit(:change, value: %{country: @pending_country, state: @pending_state})
               }
               disabled={!@has_changes}
             >
