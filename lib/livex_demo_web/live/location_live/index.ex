@@ -10,6 +10,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:noreply,
      socket
      |> assign_new(:location_modal, fn -> nil end)
+     |> assign_new(:counter, fn -> 0 end)
      |> assign_new(:page_title, fn -> "Listing Locations" end)
      |> assign_new(:location_modal, fn -> nil end)
      |> stream(:locations, Demo.list_locations())}
@@ -17,6 +18,8 @@ defmodule LivexDemoWeb.LocationLive.Index do
 
   @impl true
   def render(assigns) do
+    assigns = Map.put(assigns, :counter, assigns.counter + 1)
+
     ~H"""
     <Layouts.app flash={@flash}>
       <.live_component
@@ -28,7 +31,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
         phx-close="close_modal"
       />
       <.header>
-        Listing Locations
+        Listing Locations {@counter}
         <:actions>
           <.button
             variant="primary"
