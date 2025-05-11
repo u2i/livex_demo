@@ -87,7 +87,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
                 JSX.assign_data(expanded: true)
               end
             }
-            phx-target={@myself}
           >
             <span :if={@expanded}>
               <.icon name="hero-x-mark" class="w-4 h-4 mr-1" /> Close
@@ -109,7 +108,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             pending_state: @state
           )
         }
-        phx-target={@myself}
       >
       </div>
       <div
@@ -124,7 +122,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
                 type="button"
                 class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
                 phx-click={JSX.assign_data(pending_country: :us, pending_state: nil)}
-                phx-target={@myself}
               >
                 United States
               </button>
@@ -132,7 +129,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
                 type="button"
                 class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
                 phx-click={JSX.assign_data(pending_country: :ca, pending_state: nil)}
-                phx-target={@myself}
               >
                 Canada
               </button>
@@ -148,7 +144,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
                 class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-zinc-500 focus:ring-zinc-500 sm:text-sm"
                 name="pending_state"
                 phx-change={JSX.assign_data()}
-                phx-target={@myself}
               >
                 <option value="" disabled selected={is_nil(@pending_state)}>
                   Select {if @pending_country == :us, do: "State", else: "Province"}
