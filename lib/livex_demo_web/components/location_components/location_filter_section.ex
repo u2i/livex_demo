@@ -89,11 +89,12 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             }
             phx-target={@myself}
           >
-            <%= if @expanded do %>
+            <span :if={@expanded}>
               <.icon name="hero-x-mark" class="w-4 h-4 mr-1" /> Close
-            <% else %>
+            </span>
+            <span :if={!@expanded}>
               <.icon name="hero-funnel" class="w-4 h-4 mr-1" /> Filter
-            <% end %>
+            </span>
           </button>
         </div>
       </div>
@@ -152,11 +153,13 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
                 <option value="" disabled selected={is_nil(@state_selected)}>
                   Select {if @country_selected == :us, do: "State", else: "Province"}
                 </option>
-                <%= for {name, code} <- @state_options do %>
-                  <option value={code} selected={@state_selected == code}>
-                    {name}
-                  </option>
-                <% end %>
+                <option
+                  :for={{name, code} <- @state_options}
+                  value={code}
+                  selected={@state_selected == code}
+                >
+                  {name}
+                </option>
               </select>
             </form>
           </div>
@@ -177,41 +180,5 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
       </div>
     </div>
     """
-  end
-
-  @impl true
-  def handle_event("apply_filter", _, socket) do
-    # Emit the change event with the current selections and close the panel
-    socket =
-      socket
-      |> assign(:expanded, false)
-      |> push_emit(:change,
-        value: %{
-          country: socket.assigns.country_selected,
-          state: socket.assigns.state_selected
-        }
-      )
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("clear_filters", _, socket) do
-    # Reset the filters, close the panel, and emit nil values
-    socket =
-      socket
-      # Default to US
-      |> assign(:country_selected, :us)
-      |> assign(:state_selected, nil)
-      |> assign(:expanded, false)
-      |> assign(:has_changes, false)
-      |> push_emit(:change,
-        value: %{
-          country: nil,
-          state: nil
-        }
-      )
-
-    {:noreply, socket}
   end
 end
