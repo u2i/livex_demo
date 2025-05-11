@@ -40,24 +40,17 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
   def render(assigns) do
     ~H"""
     <div id={@id} class="relative">
-      <!-- Collapsed Filter Bar -->
       <div class="bg-white border border-gray-200 rounded-md shadow-sm p-3 flex items-center justify-between relative z-20">
         <div class="flex items-center space-x-2">
           <h3 class="text-lg font-medium text-gray-700">{@title}</h3>
-          
-    <!-- Filter Status -->
           <div :if={@selected_country || @selected_state} class="flex items-center ml-4">
             <span class="text-sm text-gray-500 mr-2">Filters:</span>
-            
-    <!-- Country Filter Badge -->
             <span
               :if={@selected_country}
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2"
             >
               {if @selected_country == :us, do: "United States", else: "Canada"}
             </span>
-            
-    <!-- State/Province Filter Badge -->
             <span
               :if={@selected_state}
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
@@ -72,18 +65,14 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
         </div>
 
         <div class="flex items-center space-x-2">
-          <!-- Clear Filters Button -->
           <button
             :if={@selected_country || @selected_state}
             type="button"
             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
-            phx-click="clear_filters"
-            phx-target={@myself}
+            phx-click={JSX.emit(:change, value: %{country: nil, state: nil})}
           >
             <.icon name="hero-x-mark" class="w-3 h-3 mr-1" /> Clear
           </button>
-          
-    <!-- Toggle Filter Button -->
           <button
             type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
@@ -108,8 +97,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
           </button>
         </div>
       </div>
-      
-    <!-- Backdrop for expanded filter (click to close) -->
       <div
         :if={@expanded}
         class="fixed inset-0"
@@ -124,8 +111,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
         phx-target={@myself}
       >
       </div>
-      
-    <!-- Expanded Filter Panel (Overlay) -->
       <div
         :if={@expanded}
         class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 z-20"
@@ -180,8 +165,9 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             <button
               type="button"
               class={"px-3 py-2 text-sm font-medium rounded-md #{if @has_changes, do: "bg-blue-600 text-white hover:bg-blue-700", else: "bg-gray-200 text-gray-500 cursor-not-allowed"}"}
-              phx-click="apply_filter"
-              phx-target={@myself}
+              phx-click={
+                JSX.emit(:change, value: %{country: @country_selected, state: @state_selected})
+              }
               disabled={!@has_changes}
             >
               Apply Filter
