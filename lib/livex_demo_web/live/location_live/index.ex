@@ -3,8 +3,11 @@ defmodule LivexDemoWeb.LocationLive.Index do
 
   alias LivexDemo.Demo
   alias LivexDemoWeb.LocationLive
+  alias LivexDemoWeb.LocationComponents.LocationFilterSection
 
   data :location_modal, LocationLive.Form, url?: false
+  data :filter_country, :atom, url?: true, one_of: [:ca, :us]
+  data :filter_state, :string, url?: true
 
   def pre_render(socket) do
     {:noreply,
@@ -12,8 +15,35 @@ defmodule LivexDemoWeb.LocationLive.Index do
      |> assign_new(:location_modal, fn -> nil end)
      |> assign_new(:counter, fn -> 0 end)
      |> assign_new(:page_title, fn -> "Listing Locations" end)
-     |> assign_new(:location_modal, fn -> nil end)
-     |> stream(:locations, Demo.list_locations())}
+     |> assign_new(:filter_country, fn -> nil end)
+     |> assign_new(:filter_state, fn -> nil end)
+     |> assign_new(:locations_query, [:filter_country, :filter_state], fn assigns ->
+       filter_locations(
+         Demo.list_locations(),
+         assigns.filter_country,
+         assigns.filter_state
+       )
+     end)
+     |> then(&stream(&1, :locations, &1.assigns.locations_query, reset: true))}
+  end
+
+  defp filter_locations(locations, nil, nil), do: locations
+
+  defp filter_locations(locations, country, nil) when not is_nil(country) do
+    country_str = Atom.to_string(country)
+    Enum.filter(locations, &(&1.country == country_str))
+  end
+
+  defp filter_locations(locations, country, state)
+       when not is_nil(country) and not is_nil(state) do
+    country_str = Atom.to_string(country)
+    Enum.filter(locations, &(&1.country == country_str && &1.state == state))
+  end
+
+  defp filter_locations(_, a, b) do
+    IO.inspect(a, label: :a)
+    IO.inspect(b, label: :b)
+    raise("HELL")
   end
 
   @impl true
@@ -41,6 +71,15 @@ defmodule LivexDemoWeb.LocationLive.Index do
           </.button>
         </:actions>
       </.header>
+
+      <.live_component
+        id="location-filter"
+        module={LocationFilterSection}
+        selected_country={@filter_country}
+        selected_state={@filter_state}
+        title="Filter Locations"
+        phx-change="change"
+      />
 
       <.table
         id="locations"
@@ -91,5 +130,17 @@ defmodule LivexDemoWeb.LocationLive.Index do
 
   def handle_event("close_modal", _, socket) do
     {:noreply, assign(socket, :location_modal, nil)}
+  end
+
+  def handle_event("change", %{"country" => country, "state" => state}, socket) do
+    country_atom =
+      if is_binary(country) && country != "", do: String.to_existing_atom(country), else: nil
+
+    state_value = if state == "", do: nil, else: state
+
+    {:noreply,
+     socket
+     |> assign(:filter_country, country_atom)
+     |> assign(:filter_state, state_value)}
   end
 end
