@@ -28,13 +28,13 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
        &assign(
          &1,
          :has_changes,
-         &1.assigns.pending_country != &1.assigns.country ||
-           &1.assigns.pending_state != &1.assigns.state
+         changed?(socket, :country, :pending_country) || changed?(socket, :state, :pending_state)
        )
      )}
   end
 
   defp get_options(country), do: Demo.get_states_with_names_for_country(country)
+  defp changed?(socket, first, second), do: socket.assigns[first] != socket.assigns[second]
 
   @impl true
   def render(assigns) do
