@@ -76,7 +76,6 @@ defmodule LivexDemoWeb do
 
   def livex_component do
     quote do
-      use Phoenix.LiveComponent
       use Livex.LivexComponent
       alias Livex.JSX
       use Livex.JSX

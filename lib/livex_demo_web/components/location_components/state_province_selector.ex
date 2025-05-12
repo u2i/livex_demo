@@ -27,7 +27,7 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} phx-value-target_path="location_modal/state_province_selector" class="space-y-4">
+    <div id={@id} class="space-y-4">
       <div class="country-selector">
         <label class="block text-sm font-semibold leading-6 text-zinc-800">Country</label>
         <div id={@country_field.name} class="flex space-x-2 mt-1">
