@@ -39,7 +39,6 @@ defmodule LivexDemo.MixProject do
       {:ecto_sqlite3, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_view, "~> 1.0.10"},
-      #    {:phoenix_live_view, path: "../phoenix_live_view", override: true},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:livex, github: "u2i/livex", override: true},
       {:floki, ">= 0.30.0", only: :test},
