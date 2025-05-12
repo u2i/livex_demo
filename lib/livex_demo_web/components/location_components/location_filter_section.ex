@@ -19,7 +19,6 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
   def pre_render(socket) do
     {:noreply,
      socket
-     |> IO.inspect(label: :filter)
      |> assign_new(:has_changes, fn -> false end)
      |> assign_new(:expanded, fn -> false end)
      |> assign_new(:pending_country, [:country], &(&1.country || :us))
