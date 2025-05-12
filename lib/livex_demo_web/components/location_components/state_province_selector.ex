@@ -5,8 +5,8 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
   use LivexDemoWeb, :livex_component
   alias LivexDemo.Demo
 
-  prop :country_field, :any
-  prop :state_field, :any
+  attr :country_field, :any
+  attr :state_field, :any
   state :country_selected, :atom
 
   def pre_render(socket) do

@@ -6,10 +6,10 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
   use LivexDemoWeb, :livex_component
   alias LivexDemo.Demo
 
-  prop :id, :string
-  prop :country, :atom
-  prop :state, :string
-  prop :title, :string
+  attr :id, :string
+  attr :country, :atom
+  attr :state, :string
+  attr :title, :string
 
   state :pending_country, :atom
   state :pending_state, :string

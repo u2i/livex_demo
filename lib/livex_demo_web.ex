@@ -59,7 +59,6 @@ defmodule LivexDemoWeb do
   def livex_view do
     quote do
       use Livex.LivexView
-      alias Livex.JSX
       use Livex.JSX
 
       unquote(html_helpers())
@@ -77,7 +76,6 @@ defmodule LivexDemoWeb do
   def livex_component do
     quote do
       use Livex.LivexComponent
-      alias Livex.JSX
       use Livex.JSX
 
       unquote(html_helpers())

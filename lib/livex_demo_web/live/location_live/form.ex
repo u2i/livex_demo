@@ -8,8 +8,8 @@ defmodule LivexDemoWeb.LocationLive.Form do
   def new, do: %{action: :new}
   def edit(id), do: %{action: :edit, location_id: id}
 
-  prop :location_id, :string
-  prop :action, :atom
+  attr :location_id, :string
+  attr :action, :atom
 
   def pre_render(socket) do
     {:noreply,
