@@ -34,14 +34,14 @@ defmodule LivexDemoWeb.LocationComponents.StateProvinceSelector do
           <button
             type="button"
             class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-click={JSX.assign_data(:country_selected, :us)}
+            phx-click={JSX.assign_state(:country_selected, :us)}
           >
             United States
           </button>
           <button
             type="button"
             class={"px-3 py-2 text-sm font-medium rounded-md #{if @country_selected == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-            phx-click={JSX.assign_data(:country_selected, :ca)}
+            phx-click={JSX.assign_state(:country_selected, :ca)}
           >
             Canada
           </button>

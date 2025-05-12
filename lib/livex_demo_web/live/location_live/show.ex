@@ -28,7 +28,7 @@ defmodule LivexDemoWeb.LocationLive.Show do
           </.button>
           <.button
             variant="primary"
-            phx-click={JSX.assign_data(:location_modal, LocationLive.Form.edit(@location.id))}
+            phx-click={JSX.assign_state(:location_modal, LocationLive.Form.edit(@location.id))}
           >
             <.icon name="hero-pencil-square" /> Edit location
           </.button>

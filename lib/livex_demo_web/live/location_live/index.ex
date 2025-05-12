@@ -58,7 +58,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
         <:actions>
           <.button
             variant="primary"
-            phx-click={JSX.assign_data(:location_modal, LocationLive.Form.new())}
+            phx-click={JSX.assign_state(:location_modal, LocationLive.Form.new())}
           >
             <.icon name="hero-plus" /> New Location
           </.button>
@@ -90,7 +90,7 @@ defmodule LivexDemoWeb.LocationLive.Index do
           <div class="sr-only">
             <.link navigate={~p"/locations/#{location}"}>Show</.link>
           </div>
-          <.link phx-click={JSX.assign_data(:location_modal, LocationLive.Form.edit(location.id))}>
+          <.link phx-click={JSX.assign_state(:location_modal, LocationLive.Form.edit(location.id))}>
             Edit
           </.link>
         </:action>

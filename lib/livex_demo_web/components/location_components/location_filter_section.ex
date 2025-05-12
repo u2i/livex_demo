@@ -78,13 +78,13 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
             phx-click={
               if @expanded do
-                JSX.assign_data(
+                JSX.assign_state(
                   expanded: false,
                   pending_country: @country,
                   pending_state: @state
                 )
               else
-                JSX.assign_data(expanded: true)
+                JSX.assign_state(expanded: true)
               end
             }
           >
@@ -102,7 +102,7 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
         class="fixed inset-0"
         style="z-index: 10;"
         phx-click={
-          JSX.assign_data(
+          JSX.assign_state(
             expanded: false,
             pending_country: @country || :us,
             pending_state: @state
@@ -121,14 +121,14 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
               <button
                 type="button"
                 class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :us, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-                phx-click={JSX.assign_data(pending_country: :us, pending_state: nil)}
+                phx-click={JSX.assign_state(pending_country: :us, pending_state: nil)}
               >
                 United States
               </button>
               <button
                 type="button"
                 class={"px-3 py-2 text-sm font-medium rounded-md #{if @pending_country == :ca, do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700"}"}
-                phx-click={JSX.assign_data(pending_country: :ca, pending_state: nil)}
+                phx-click={JSX.assign_state(pending_country: :ca, pending_state: nil)}
               >
                 Canada
               </button>
@@ -143,7 +143,7 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
               <select
                 class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-zinc-500 focus:ring-zinc-500 sm:text-sm"
                 name="pending_state"
-                phx-change={JSX.assign_data()}
+                phx-change={JSX.assign_state()}
               >
                 <option value="" disabled selected={is_nil(@pending_state)}>
                   Select {if @pending_country == :us, do: "State", else: "Province"}
