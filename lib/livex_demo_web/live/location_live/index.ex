@@ -18,25 +18,8 @@ defmodule LivexDemoWeb.LocationLive.Index do
      |> assign_new(:filter_country, fn -> nil end)
      |> assign_new(:filter_state, fn -> nil end)
      |> stream_new(:locations, [:filter_country, :filter_state], fn assigns ->
-       filter_locations(
-         Demo.list_locations(),
-         assigns.filter_country,
-         assigns.filter_state
-       )
+       Demo.list_locations(assigns.filter_country, assigns.filter_state)
      end)}
-  end
-
-  defp filter_locations(locations, nil, nil), do: locations
-
-  defp filter_locations(locations, country, nil) when not is_nil(country) do
-    country_str = Atom.to_string(country)
-    Enum.filter(locations, &(&1.country == country_str))
-  end
-
-  defp filter_locations(locations, country, state)
-       when not is_nil(country) and not is_nil(state) do
-    country_str = Atom.to_string(country)
-    Enum.filter(locations, &(&1.country == country_str && &1.state == state))
   end
 
   @impl true

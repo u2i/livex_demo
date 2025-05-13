@@ -84,15 +84,36 @@ defmodule LivexDemo.Demo do
   @doc """
   Returns the list of locations.
 
+  Optionally filters by country and/or state if provided.
+
   ## Examples
 
       iex> list_locations()
       [%Location{}, ...]
 
+      iex> list_locations(:us, "CA")
+      [%Location{country: "us", state: "CA"}, ...]
+
   """
   def list_locations do
     Repo.all(Location)
   end
+
+  def list_locations(country, state) do
+    Location
+    |> filter_by_country(country)
+    |> filter_by_state(state)
+    |> Repo.all()
+  end
+
+  defp filter_by_country(query, nil), do: query
+  defp filter_by_country(query, country) do
+    country_str = Atom.to_string(country)
+    where(query, [l], l.country == ^country_str)
+  end
+
+  defp filter_by_state(query, nil), do: query
+  defp filter_by_state(query, state), do: where(query, [l], l.state == ^state)
 
   @doc """
   Gets a single location.
