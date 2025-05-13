@@ -1,6 +1,6 @@
 # LivexDemo
 
-This is a demo application for [LiveX](https://github.com/u2i/livex), a library that enhances Phoenix LiveView with additional features.
+This is a demo application for [Livex](https://github.com/u2i/livex), a library that enhances Phoenix LiveView with additional features.
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ## Testing Reconnect Behavior
 
-To test the reconnect behavior of LiveX, press `Ctrl+C` to stop the running server and restart it.
+To test the reconnect behavior of Livex, press `Ctrl+C` to stop the running server and restart it.
 And to ensure that dev-time asset management doesn't trigger full page reloads use the following to
 start it.
 
