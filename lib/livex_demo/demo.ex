@@ -107,6 +107,7 @@ defmodule LivexDemo.Demo do
   end
 
   defp filter_by_country(query, nil), do: query
+
   defp filter_by_country(query, country) do
     country_str = Atom.to_string(country)
     where(query, [l], l.country == ^country_str)

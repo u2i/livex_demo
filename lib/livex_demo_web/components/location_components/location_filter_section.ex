@@ -69,7 +69,8 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             :if={@country || @state}
             type="button"
             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
-            phx-click={JSX.emit(:change, value: %{country: nil, state: nil})}
+            phx-target={@myself}
+            phx-click="clear"
           >
             <.icon name="hero-x-mark" class="w-3 h-3 mr-1" /> Clear
           </button>
@@ -163,9 +164,8 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
             <button
               type="button"
               class={"px-3 py-2 text-sm font-medium rounded-md #{if @has_changes, do: "bg-blue-600 text-white hover:bg-blue-700", else: "bg-gray-200 text-gray-500 cursor-not-allowed"}"}
-              phx-click={
-                JSX.emit(:change, value: %{country: @pending_country, state: @pending_state})
-              }
+              phx-target={@myself}
+              phx-click="apply"
               disabled={!@has_changes}
             >
               Apply Filter
@@ -175,5 +175,17 @@ defmodule LivexDemoWeb.LocationComponents.LocationFilterSection do
       </div>
     </div>
     """
+  end
+
+  def handle_event("clear", _, socket) do
+    {:noreply, send_message(socket, :change, %{country: nil, state: nil})}
+  end
+
+  def handle_event("apply", _, socket) do
+    {:noreply,
+     send_message(socket, :change, %{
+       country: socket.assigns.pending_country,
+       state: socket.assigns.pending_state
+     })}
   end
 end

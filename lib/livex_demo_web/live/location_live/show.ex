@@ -48,6 +48,7 @@ defmodule LivexDemoWeb.LocationLive.Show do
         :if={@location_modal}
         id={:location_modal}
         module={LocationLive.Form}
+        target={nil}
         {@location_modal}
         phx-close="close_modal"
       />
@@ -55,7 +56,7 @@ defmodule LivexDemoWeb.LocationLive.Show do
     """
   end
 
-  def handle_event("close_modal", _, socket) do
+  def handle_message(_, :close, _, socket) do
     {:noreply,
      Map.put(socket, :assigns, Map.drop(socket.assigns, [:location]))
      |> assign(:location_modal, nil)}

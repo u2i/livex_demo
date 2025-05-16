@@ -32,9 +32,9 @@ defmodule LivexDemoWeb.LocationLive.Index do
         :if={@location_modal}
         id={:location_modal}
         module={LocationLive.Form}
-        parent={nil}
+        target={nil}
         {@location_modal}
-        phx-close="close_modal"
+        phx-close={:close_modal}
       />
       <.header>
         Listing Locations {@counter}
@@ -51,10 +51,10 @@ defmodule LivexDemoWeb.LocationLive.Index do
       <.live_component
         id="location-filter"
         module={LocationFilterSection}
+        target={nil}
         country={@filter_country}
         state={@filter_state}
         title="Filter Locations"
-        phx-change="change"
       />
 
       <.table
@@ -98,25 +98,20 @@ defmodule LivexDemoWeb.LocationLive.Index do
     {:noreply, stream_delete(socket, :locations, location)}
   end
 
-  def handle_event("close_modal", %{"location_id" => location_id}, socket) do
+  def handle_message(_, :close, %{location_id: location_id} = _params, socket) do
     location = Demo.get_location!(location_id)
 
     {:noreply, assign(socket, :location_modal, nil) |> stream_insert(:locations, location)}
   end
 
-  def handle_event("close_modal", _, socket) do
+  def handle_message(_, :close, _, socket) do
     {:noreply, assign(socket, :location_modal, nil)}
   end
 
-  def handle_event("change", %{"country" => country, "state" => state}, socket) do
-    country_atom =
-      if is_binary(country) && country != "", do: String.to_existing_atom(country), else: nil
-
-    state_value = if state == "", do: nil, else: state
-
+  def handle_message(_, :change, %{country: country, state: state}, socket) do
     {:noreply,
      socket
-     |> assign(:filter_country, country_atom)
-     |> assign(:filter_state, state_value)}
+     |> assign(:filter_country, country)
+     |> assign(:filter_state, state)}
   end
 end

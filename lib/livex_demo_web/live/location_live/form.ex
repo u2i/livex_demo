@@ -29,7 +29,7 @@ defmodule LivexDemoWeb.LocationLive.Form do
       phx-mounted={modal_show()}
       class="fixed inset-0 z-50 flex items-center justify-center modal-container opacity-0"
     >
-      <.modal id={Atom.to_string(@id) <> "-modal"} phx-close={JSX.emit(:close)}>
+      <.modal id={Atom.to_string(@id) <> "-modal"} phx-target={@myself} phx-close="close">
         <:title>{@page_title}</:title>
         <:subtitle>Use this form to manage location records in your database.</:subtitle>
         <.form
@@ -49,13 +49,12 @@ defmodule LivexDemoWeb.LocationLive.Form do
             module={StateProvinceSelector}
             state_field={@form[:state]}
             country_field={@form[:country]}
-            phx-target={@myself}
           />
           <.input field={@form[:description]} type="textarea" label="Description" />
           <.button phx-disable-with="Saving..." disabled={@is_button_disabled} variant="primary">
             Save Location
           </.button>
-          <.button type="button" phx-click={JSX.emit(:close)}>
+          <.button type="button" phx-target={@myself} phx-click="close">
             Cancel
           </.button>
         </.form>
@@ -81,11 +80,15 @@ defmodule LivexDemoWeb.LocationLive.Form do
       {:ok, location} ->
         {:noreply,
          assign(socket, :is_button_disabled, true)
-         |> push_emit(:close, value: %{location_id: location.id})}
+         |> send_message(:close, %{location_id: location.id})}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
     end
+  end
+
+  def handle_event("close", _params, socket) do
+    {:noreply, send_message(socket, :close, %{})}
   end
 
   defp write_location(%{assigns: %{action: :edit}} = socket, location_params),
